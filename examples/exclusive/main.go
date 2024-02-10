@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 import (
@@ -6,10 +8,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/nbd-wtf/go-nostr"
+
 	"github.com/fiatjaf/eventstore/lmdb"
 	"github.com/fiatjaf/khatru"
 	"github.com/fiatjaf/khatru/policies"
-	"github.com/nbd-wtf/go-nostr"
 )
 
 func main() {

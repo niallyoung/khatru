@@ -2,11 +2,11 @@ package policies
 
 import (
 	"context"
-
 	"slices"
 
-	"github.com/fiatjaf/khatru"
 	"github.com/nbd-wtf/go-nostr"
+
+	"github.com/fiatjaf/khatru"
 )
 
 // RejectKind04Snoopers prevents reading NIP-04 messages from people not involved in the conversation.

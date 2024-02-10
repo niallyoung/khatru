@@ -129,6 +129,7 @@ Fear no more. Using the https://github.com/fiatjaf/eventstore module you get a b
 	relay.DeleteEvent = append(relay.DeleteEvent, db.DeleteEvent)
 ```
 
+<<<<<<< HEAD
 ### But I don't want to write a bunch of custom policies!
 
 Fear no more. We have a bunch of common policies written in the `github.com/fiatjaf/khatru/policies` package and also a handpicked selection of base sane defaults, which you can apply with:
@@ -138,3 +139,18 @@ Fear no more. We have a bunch of common policies written in the `github.com/fiat
 ```
 
 Contributions to this are very much welcomed.
+=======
+### Contributions
+
+Make sure the tests pass. Soon linting will also pass.
+
+```shell
+make lint
+make test
+make cover
+
+make docker.lint
+make docker.test
+make docker.cover
+```
+>>>>>>> cd6fe59 (relay_test.go)
