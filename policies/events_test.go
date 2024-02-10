@@ -2,10 +2,11 @@ package policies_test
 
 import (
 	"context"
-	"github.com/nbd-wtf/go-nostr"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/nbd-wtf/go-nostr"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/fiatjaf/khatru/policies"
 )

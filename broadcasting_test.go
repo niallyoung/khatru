@@ -1,10 +1,12 @@
 package khatru_test
 
 import (
-	"github.com/fiatjaf/khatru"
+	"testing"
+
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/fiatjaf/khatru"
 )
 
 func TestRelay_BroadcastEvent(t *testing.T) {
