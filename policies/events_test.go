@@ -116,3 +116,147 @@ func TestPreventTimestampsInThePast(t *testing.T) {
 		}
 	})
 }
+
+func TestRestrictToSpecifiedKinds(t *testing.T) {
+	t.Run("returns false when event.Kind in slice", func(t *testing.T) {
+		variousInts := []uint16{0, 1, 20, 9999}
+
+		event := &nostr.Event{Kind: 0}
+		fn := policies.RestrictToSpecifiedKinds(variousInts...)
+
+		ok, result := fn(context.Background(), event)
+
+		assert.Equal(t, false, ok)
+		assert.Equal(t, "", result)
+	})
+
+	t.Run("returns true when event.Kind < min", func(t *testing.T) {
+		variousInts := []uint16{3, 1, 5, 20, 9999}
+
+		event := &nostr.Event{Kind: 0}
+		fn := policies.RestrictToSpecifiedKinds(variousInts...)
+
+		ok, result := fn(context.Background(), event)
+
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "event kind not allowed", result)
+	})
+
+	t.Run("returns true when event.Kind > max", func(t *testing.T) {
+		variousInts := []uint16{1, 5, 20}
+
+		event := &nostr.Event{Kind: 999}
+		fn := policies.RestrictToSpecifiedKinds(variousInts...)
+
+		ok, result := fn(context.Background(), event)
+
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "event kind not allowed", result)
+	})
+
+	t.Run("returns false when event.Kind not in variousInts", func(t *testing.T) {
+		variousInts := []uint16{1, 5, 20}
+
+		event := &nostr.Event{Kind: 6}
+		fn := policies.RestrictToSpecifiedKinds(variousInts...)
+
+		ok, result := fn(context.Background(), event)
+
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "event kind not allowed", result)
+	})
+}
+
+func TestPreventLargeTags(t *testing.T) {
+	t.Run("returns false when a tags is <= maxTagValueLen", func(t *testing.T) {
+		event := &nostr.Event{
+			Tags: nostr.Tags{
+				nostr.Tag{"k", "v"},
+				nostr.Tag{"l", "m"},
+				nostr.Tag{"m", "n"},
+			},
+		}
+
+		fn := policies.PreventLargeTags(1)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, false, ok)
+		assert.Equal(t, "", msg)
+	})
+
+	t.Run("returns true when a tags is > maxTagValueLen", func(t *testing.T) {
+		event := &nostr.Event{
+			Tags: nostr.Tags{
+				nostr.Tag{"n", "ooooooo"},
+			},
+		}
+
+		fn := policies.PreventLargeTags(1)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "event contains too large tags", msg)
+	})
+}
+
+func TestPreventTooManyIndexableTags(t *testing.T) {
+	t.Run("returns false when event.Kind in ignoreKinds", func(t *testing.T) {
+		event := &nostr.Event{Kind: 0}
+		ignoreKinds := []int{0}
+		onlyKinds := []int{}
+
+		fn := policies.PreventTooManyIndexableTags(3, ignoreKinds, onlyKinds)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, false, ok)
+		assert.Equal(t, "", msg)
+	})
+
+	t.Run("returns false when event.Kind in onlyKinds", func(t *testing.T) {
+		event := &nostr.Event{Kind: 0}
+		ignoreKinds := []int{}
+		onlyKinds := []int{0}
+
+		fn := policies.PreventTooManyIndexableTags(3, ignoreKinds, onlyKinds)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, false, ok)
+		assert.Equal(t, "", msg)
+	})
+
+	t.Run("returns false when not too many tags", func(t *testing.T) {
+		event := &nostr.Event{
+			Kind: 0,
+			Tags: nostr.Tags{
+				nostr.Tag{"k", "v"},
+			},
+		}
+		ignoreKinds := []int{}
+		onlyKinds := []int{0}
+
+		fn := policies.PreventTooManyIndexableTags(1, ignoreKinds, onlyKinds)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, false, ok)
+		assert.Equal(t, "", msg)
+	})
+
+	t.Run("returns true when too many tags", func(t *testing.T) {
+		event := &nostr.Event{
+			Kind: 0,
+			Tags: nostr.Tags{
+				nostr.Tag{"k", "v"},
+				nostr.Tag{"l", "m"},
+				nostr.Tag{"m", "n"},
+			},
+		}
+		ignoreKinds := []int{}
+		onlyKinds := []int{0}
+
+		fn := policies.PreventTooManyIndexableTags(1, ignoreKinds, onlyKinds)
+		ok, msg := fn(context.Background(), event)
+
+		assert.Equal(t, true, ok)
+		assert.Equal(t, "too many indexable tags", msg)
+	})
+}
