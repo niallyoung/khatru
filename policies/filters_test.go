@@ -2,10 +2,12 @@ package policies_test
 
 import (
 	"context"
-	"github.com/fiatjaf/khatru/policies"
+	"testing"
+
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/fiatjaf/khatru/policies"
 )
 
 func TestNoComplexFilters(t *testing.T) {
@@ -127,7 +129,7 @@ func TestRemoveAllButKinds(t *testing.T) {
 }
 
 func TestRemoveAllButTags(t *testing.T) {
-	t.Run("", func(t *testing.T) {
+	t.Run("should remove all tags except what we specify", func(t *testing.T) {
 		tags := make(map[string][]string)
 		tags["foo"] = []string{"k", "v"}
 		filter := &nostr.Filter{Tags: tags}
