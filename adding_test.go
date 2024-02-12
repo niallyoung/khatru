@@ -48,4 +48,31 @@ func TestRelay_AddEvent(t *testing.T) {
 			assert.ErrorContains(t, err, "blocked: no reason")
 		})
 	})
+
+	t.Run("20000 <= event.Kind < 30000", func(t *testing.T) {
+		t.Run("", func(t *testing.T) {
+			scenarios := []struct {
+				Name string
+				Kind int
+			}{
+				{Name: "<", Kind: 19999},
+				{Name: "min", Kind: 20000},
+				{Name: "mid", Kind: 20000},
+				{Name: "max", Kind: 30000},
+				{Name: ".", Kind: 30001},
+			}
+
+			for _, s := range scenarios {
+				t.Run(s.Name, func(t *testing.T) {
+					relay := khatru.NewRelay()
+					relay.OnEphemeralEvent = append(relay.OnEphemeralEvent,
+						func(ctx context.Context, event *nostr.Event) { return },
+					)
+
+					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: s.Kind})
+					assert.NoError(t, err)
+				})
+			}
+		})
+	})
 }
