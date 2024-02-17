@@ -1,13 +1,13 @@
 SHELL := /bin/bash
 
 test:
-	go test \
-		-coverprofile=coverage.out \
-		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
-		./...
+	go test ./...
 .PHONY: test
 
 cover:
-	@$(MAKE) test 2>/dev/null 1>&2
+	@go test \
+		-coverprofile=coverage.out \
+		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
+		./... 2>/dev/null 1>&2
 	@./cover.sh
 .PHONY: cover
