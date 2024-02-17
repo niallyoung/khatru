@@ -1,21 +1,40 @@
-SHELL := /bin/bash
+SHELL:=/bin/sh
 
-all: build test cover
+NAME:=khatru
+HASH:=$(shell git rev-parse --short HEAD)
+
+all: test cover
 .PHONY: all
 
-build:
-	go build
-.PHONY: build
+lint:
+	go get github.com/golangci/golangci-lint && golangci-lint run --timeout=5m
 
-test: build
+test:
 	go test ./...
 .PHONY: test
 
 cover:
-	@$(MAKE) build >/dev/null
 	@go test \
 		-coverprofile=coverage.out \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
 		./... 1>/dev/null 2>&1
 	@./cover.sh
 .PHONY: cover
+
+docker.build:
+	docker build . \
+		-f Dockerfile -t $(NAME):$(HASH) \
+		--build-arg BUILD_REVISION=$(HASH)
+	docker tag $(NAME):$(HASH) $(NAME):latest
+
+docker.lint: docker.build
+	docker run --rm -v $(PWD):/app $(NAME):$(HASH) golangci-lint run --timeout=5m .
+
+docker.test: docker.build
+	docker run --rm -v $(PWD):/app $(NAME):$(HASH) make test
+
+docker.cover: docker.build
+	docker run --rm -v $(PWD):/app $(NAME):$(HASH) make cover
+
+docker.shell: docker.build
+	docker run --rm -it -v $(PWD):/app $(NAME):$(HASH) /bin/sh

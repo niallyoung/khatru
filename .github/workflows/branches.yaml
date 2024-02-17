@@ -18,6 +18,10 @@ jobs:
         with:
           go-version-file: ./go.mod
 
+# TODO enable once decent coverage
+#      - name: "lint"
+#        run: make lint
+
       - name: "compile"
         run: make build
 
