@@ -4,27 +4,23 @@ on:
   - pull_request
 
 jobs:
-  compile:
-    runs-on: alpine-latest
-    steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
-      - run: make build
   test:
     runs-on: alpine-latest
     steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-go@v5
+      - name: checkout
+        uses: actions/checkout@v4.1.1
+      - name: compile
+        uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - run: make test
-  test-cover:
-    runs-on: alpine-latest
-    steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/setup-go@v5
+        run: make build
+      - name: unit tests
+        uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-      - run: make cover
+        run: make test
+      - name: "test coverage"
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
+        run: make cover
