@@ -1,26 +1,28 @@
 name: test every commit
+
 on:
   - push
   - pull_request
 
 jobs:
+
   test:
     runs-on: alpine-latest
     steps:
-      - name: checkout
+
+      - name: "checkout"
         uses: actions/checkout@v4.1.1
-      - name: compile
+
+      - name: "golang"
         uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
+
+      - name: "compile"
         run: make build
-      - name: unit tests
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
+
+      - name: "unit tests"
         run: make test
+
       - name: "test coverage"
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ./go.mod
         run: make cover
