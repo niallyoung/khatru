@@ -10,7 +10,11 @@ ACTUAL_COVERAGE=$(
 )
 echo "$ACTUAL_COVERAGE% statements"
 
-MINIMUM_ACHIEVED=`bc -e "$ACTUAL_COVERAGE >= $MINIMUM_COVERAGE"`
+if [ "$(uname)" == "Darwin" ]; then
+  MINIMUM_ACHIEVED=`bc -e "$ACTUAL_COVERAGE >= $MINIMUM_COVERAGE"`
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  MINIMUM_ACHIEVED=`echo "$ACTUAL_COVERAGE >= $MINIMUM_COVERAGE" | bc`
+fi
 
 if [ $MINIMUM_ACHIEVED == 1 ]; then
   exit 0

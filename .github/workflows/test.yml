@@ -5,7 +5,7 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-latest
+    runs-on: alpine-latest
     steps:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-go@v5
@@ -13,7 +13,7 @@ jobs:
           go-version-file: ./go.mod
       - run: make build
   test:
-    runs-on: ubuntu-latest
+    runs-on: alpine-latest
     steps:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-go@v5
@@ -21,7 +21,7 @@ jobs:
           go-version-file: ./go.mod
       - run: make test
   test-cover:
-    runs-on: ubuntu-latest
+    runs-on: alpine-latest
     steps:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-go@v5
