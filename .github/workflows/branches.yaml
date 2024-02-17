@@ -1,8 +1,8 @@
-name: test every commit
+name: branches
 
 on:
-  - push
-  - pull_request
+  push:
+    branches: "*"
 
 jobs:
 
@@ -13,7 +13,7 @@ jobs:
       - name: "checkout"
         uses: actions/checkout@v4.1.1
 
-      - name: "golang"
+      - name: "setup-go"
         uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
