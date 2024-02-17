@@ -1,10 +1,17 @@
 SHELL := /bin/bash
 
-test:
+all: build test cover
+.PHONY: all
+
+build:
+	go build
+.PHONY: build
+
+test: build
 	go test ./...
 .PHONY: test
 
-cover:
+cover: build
 	@go test \
 		-coverprofile=coverage.out \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
