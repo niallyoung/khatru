@@ -7,7 +7,7 @@ all: test cover
 .PHONY: all
 
 lint:
-	go get github.com/golangci/golangci-lint && golangci-lint run --timeout=5m
+	golangci-lint run --timeout=5m
 
 test:
 	go test ./...
@@ -28,7 +28,7 @@ docker.build:
 	docker tag $(NAME):$(HASH) $(NAME):latest
 
 docker.lint: docker.build
-	docker run --rm -v $(PWD):/app $(NAME):$(HASH) golangci-lint run --timeout=5m .
+	docker run --rm -v $(PWD):/app $(NAME):$(HASH) make lint
 
 docker.test: docker.build
 	docker run --rm -v $(PWD):/app $(NAME):$(HASH) make test
