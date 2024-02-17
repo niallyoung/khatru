@@ -6,27 +6,27 @@ on:
 
 jobs:
 
+#  lint:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4.1.1
+#      - uses: actions/setup-go@v5
+#        with:
+#          go-version-file: ./go.mod
+#      - run: make lint
   test:
     runs-on: ubuntu-latest
     steps:
-
-      - name: "checkout"
-        uses: actions/checkout@v4.1.1
-
-      - name: "setup-go"
-        uses: actions/setup-go@v5
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
-
-# TODO enable once decent coverage
-#      - name: "lint"
-#        run: make lint
-
-      - name: "compile"
-        run: make build
-
-      - name: "unit tests"
-        run: make test
-
-      - name: "test coverage"
+      - run: make test
+  cover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ./go.mod
         run: make cover
