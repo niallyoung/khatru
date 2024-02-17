@@ -11,10 +11,11 @@ test: build
 	go test ./...
 .PHONY: test
 
-cover: build
+cover:
+	@$(MAKE) build >/dev/null
 	@go test \
 		-coverprofile=coverage.out \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
-		./... 2>/dev/null 1>&2
+		./... 1>/dev/null 2>&1
 	@./cover.sh
 .PHONY: cover
