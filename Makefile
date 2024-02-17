@@ -16,6 +16,7 @@ test:
 cover:
 	@go test \
 		-coverprofile=coverage.out \
+#		-covermode=atomic \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
 		./... 1>/dev/null 2>&1
 	@./cover.sh
