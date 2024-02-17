@@ -5,8 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/fiatjaf/eventstore"
 	"github.com/nbd-wtf/go-nostr"
+
+	"github.com/fiatjaf/eventstore"
 )
 
 // AddEvent sends an event through then normal add pipeline, as if it was received from a websocket.
