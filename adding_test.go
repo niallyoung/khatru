@@ -81,7 +81,7 @@ func TestRelay_AddEvent(t *testing.T) {
 		kinds := []int{0, 3, 10000, 19999}
 
 		t.Run("query returns an error", func(t *testing.T) {
-			for k := range kinds {
+			for _, k := range kinds {
 				t.Run(fmt.Sprint(k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
@@ -95,7 +95,7 @@ func TestRelay_AddEvent(t *testing.T) {
 		})
 
 		t.Run("replaceable events are deleted before storing", func(t *testing.T) {
-			for k := range kinds {
+			for _, k := range kinds {
 				t.Run(fmt.Sprint(k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
@@ -120,11 +120,10 @@ func TestRelay_AddEvent(t *testing.T) {
 	})
 
 	t.Run("30000 <= event.Kind < 40000", func(t *testing.T) {
-		kinds := []int{30000, 35000, 39999}
-
 		t.Run("parameterized, replaceable events are deleted before storing", func(t *testing.T) {
-			for k := range kinds {
-				t.Run(fmt.Sprint(k), func(t *testing.T) {
+			kinds := []int{30000, 35000, 39999}
+			for _, k := range kinds {
+				t.Run(fmt.Sprintf("with kind %d", k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
 						ch := make(chan *nostr.Event)
