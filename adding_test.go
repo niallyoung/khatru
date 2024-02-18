@@ -107,12 +107,15 @@ func TestRelay_AddEvent(t *testing.T) {
 						}()
 						return ch, nil
 					})
+
+					deleteEventCalled := false
 					relay.DeleteEvent = append(relay.DeleteEvent,
-						func(ctx context.Context, event *nostr.Event) error { return nil },
+						func(ctx context.Context, event *nostr.Event) error { deleteEventCalled = true; return nil },
 					)
 
 					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k, CreatedAt: 1})
 					assert.NoError(t, err)
+					assert.Equal(t, true, deleteEventCalled)
 				})
 			}
 		})
@@ -120,18 +123,43 @@ func TestRelay_AddEvent(t *testing.T) {
 	})
 
 	t.Run("30000 <= event.Kind < 40000", func(t *testing.T) {
-		t.Run("parameterized, replaceable events are deleted before storing", func(t *testing.T) {
-			kinds := []int{30000, 35000, 39999}
+		kinds := []int{30000, 35000, 39999}
+
+		t.Run("QueryEvents returns error", func(t *testing.T) {
 			for _, k := range kinds {
-				t.Run(fmt.Sprintf("with kind %d", k), func(t *testing.T) {
+				t.Run(fmt.Sprintf("for events with kind %d", k), func(t *testing.T) {
+					relay := khatru.NewRelay()
+					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+						ch := make(chan *nostr.Event)
+						go func() { close(ch) }()
+						return ch, errors.New("fake query error")
+					})
+
+					err := relay.AddEvent(context.Background(), &nostr.Event{
+						Kind:   k,
+						PubKey: "fake-pubkey",
+						Tags: nostr.Tags{
+							[]string{"d", "v"},
+						},
+					})
+					assert.NoError(t, err)
+				})
+			}
+		})
+
+		t.Run("QueryEvents returns an older event", func(t *testing.T) {
+			for _, k := range kinds {
+				t.Run(fmt.Sprintf("for events with kind %d", k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
 						ch := make(chan *nostr.Event)
 						go func() {
 							previous := &nostr.Event{
-								Kind: k,
+								Kind:      k,
+								PubKey:    "fake-pubkey",
+								CreatedAt: 0,
 								Tags: nostr.Tags{
-									[]string{"k", "v"},
+									[]string{"d", "v"},
 								},
 							}
 							ch <- previous
@@ -139,17 +167,22 @@ func TestRelay_AddEvent(t *testing.T) {
 						}()
 						return ch, nil
 					})
+
+					deleteEventCalled := false
 					relay.DeleteEvent = append(relay.DeleteEvent,
-						func(ctx context.Context, event *nostr.Event) error { return nil },
+						func(ctx context.Context, event *nostr.Event) error { deleteEventCalled = true; return nil },
 					)
 
 					err := relay.AddEvent(context.Background(), &nostr.Event{
-						Kind: k,
+						Kind:      k,
+						PubKey:    "fake-pubkey",
+						CreatedAt: 1,
 						Tags: nostr.Tags{
-							[]string{"k", "v"},
+							[]string{"d", "v"},
 						},
 					})
 					assert.NoError(t, err)
+					assert.Equal(t, true, deleteEventCalled)
 				})
 			}
 		})
