@@ -18,6 +18,7 @@ cover:
 	@go test \
 		-timeout=5m \
 		-coverprofile=coverage.out \
+		-covermode=atomic \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
 		./...
 	$(./cover.sh)
