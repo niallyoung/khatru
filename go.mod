@@ -1,6 +1,6 @@
 module github.com/fiatjaf/khatru
 
-go 1.21.4
+go 1.22
 
 require (
 	github.com/fasthttp/websocket v1.5.7

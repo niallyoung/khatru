@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/fiatjaf/eventstore"
 	"github.com/nbd-wtf/go-nostr"
 	"github.com/stretchr/testify/assert"
 
@@ -53,24 +54,15 @@ func TestRelay_AddEvent(t *testing.T) {
 
 	t.Run("20000 <= event.Kind < 30000", func(t *testing.T) {
 		t.Run("", func(t *testing.T) {
-			scenarios := []struct {
-				Name string
-				Kind int
-			}{
-				{Name: "<", Kind: 19999},
-				{Name: "min", Kind: 20000},
-				{Name: "mid", Kind: 20000},
-				{Name: "max", Kind: 29999},
-			}
-
-			for _, s := range scenarios {
-				t.Run(s.Name, func(t *testing.T) {
+			kinds := []int{20000, 25000, 29999}
+			for _, k := range kinds {
+				t.Run(fmt.Sprint(k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.OnEphemeralEvent = append(relay.OnEphemeralEvent,
 						func(ctx context.Context, event *nostr.Event) { return },
 					)
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: s.Kind})
+					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k})
 					assert.NoError(t, err)
 				})
 			}
@@ -125,14 +117,13 @@ func TestRelay_AddEvent(t *testing.T) {
 	t.Run("30000 <= event.Kind < 40000", func(t *testing.T) {
 		kinds := []int{30000, 35000, 39999}
 
-		t.Run("QueryEvents returns error", func(t *testing.T) {
+		t.Run("QueryEvents returns no error, when QueryEvents returns error", func(t *testing.T) {
 			for _, k := range kinds {
+
 				t.Run(fmt.Sprintf("for events with kind %d", k), func(t *testing.T) {
 					relay := khatru.NewRelay()
 					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
-						ch := make(chan *nostr.Event)
-						go func() { close(ch) }()
-						return ch, errors.New("fake query error")
+						return nil, errors.New("fake query error")
 					})
 
 					err := relay.AddEvent(context.Background(), &nostr.Event{
@@ -147,7 +138,7 @@ func TestRelay_AddEvent(t *testing.T) {
 			}
 		})
 
-		t.Run("QueryEvents returns an older event", func(t *testing.T) {
+		t.Run("QueryEvents deletes events when older duplicates are found", func(t *testing.T) {
 			for _, k := range kinds {
 				t.Run(fmt.Sprintf("for events with kind %d", k), func(t *testing.T) {
 					relay := khatru.NewRelay()
@@ -186,5 +177,94 @@ func TestRelay_AddEvent(t *testing.T) {
 				})
 			}
 		})
+	})
+
+	t.Run("StoreEvent is called", func(t *testing.T) {
+		kinds := []int{1, 2, 9999999}
+
+		for _, k := range kinds {
+			t.Run(fmt.Sprintf("for events with kind %d", k), func(t *testing.T) {
+
+				t.Run("AddEvent() calls StoreEvent and OnEventSaved", func(t *testing.T) {
+					relay := khatru.NewRelay()
+					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+						return nil, nil
+					})
+
+					storeEventCalled := false
+					relay.StoreEvent = append(relay.StoreEvent, func(ctx context.Context, event *nostr.Event) error {
+						storeEventCalled = true
+						return nil
+					})
+
+					onEventSavedCalled := false
+					relay.OnEventSaved = append(relay.OnEventSaved, func(ctx context.Context, event *nostr.Event) {
+						onEventSavedCalled = true
+						return
+					})
+
+					err := relay.AddEvent(context.Background(), &nostr.Event{
+						Kind:      k,
+						PubKey:    "fake-pubkey",
+						CreatedAt: 0,
+						Tags: nostr.Tags{
+							[]string{"d", "v"},
+						},
+					})
+					assert.NoError(t, err)
+					assert.Equal(t, true, storeEventCalled)
+					assert.Equal(t, true, onEventSavedCalled)
+				})
+
+				t.Run("AddEvent() handles duplicates without a store error", func(t *testing.T) {
+					relay := khatru.NewRelay()
+					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+						return nil, nil
+					})
+
+					storeEventCalled := false
+					relay.StoreEvent = append(relay.StoreEvent, func(ctx context.Context, event *nostr.Event) error {
+						storeEventCalled = true
+						return eventstore.ErrDupEvent
+					})
+
+					err := relay.AddEvent(context.Background(), &nostr.Event{
+						Kind:      k,
+						PubKey:    "fake-pubkey",
+						CreatedAt: 0,
+						Tags: nostr.Tags{
+							[]string{"d", "v"},
+						},
+					})
+					assert.NoError(t, err)
+					assert.Equal(t, true, storeEventCalled)
+				})
+
+				t.Run("AddEvent() handles other store errors", func(t *testing.T) {
+					relay := khatru.NewRelay()
+					relay.QueryEvents = append(relay.QueryEvents, func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+						return nil, nil
+					})
+
+					storeEventCalled := false
+					relay.StoreEvent = append(relay.StoreEvent, func(ctx context.Context, event *nostr.Event) error {
+						storeEventCalled = true
+						return errors.New("fake store error")
+					})
+
+					err := relay.AddEvent(context.Background(), &nostr.Event{
+						Kind:      k,
+						PubKey:    "fake-pubkey",
+						CreatedAt: 1,
+						Tags: nostr.Tags{
+							[]string{"d", "v"},
+						},
+					})
+					assert.Error(t, err)
+					assert.ErrorContains(t, err, "fake store error")
+					assert.Equal(t, true, storeEventCalled)
+				})
+			})
+		}
 	})
 }
