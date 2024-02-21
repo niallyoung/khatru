@@ -7,7 +7,7 @@ all: test cover
 .PHONY: all
 
 lint:
-	golangci-lint run --timeout=5m
+	go run github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout=5m ./... | tee lint.out
 .PHONY: lint
 
 test:
