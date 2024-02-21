@@ -21,7 +21,7 @@ cover:
 		-covermode=atomic \
 		-coverpkg $(go list github.com/fiatjaf/khatru/...) \
 		./...
-	$(./cover.sh)
+	$(./.meta/cover.sh)
 .PHONY: cover
 
 docker.build:

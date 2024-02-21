@@ -1,4 +1,4 @@
-//go:build exclude
+//go:build ignore
 
 package main
 
@@ -8,8 +8,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/fiatjaf/khatru"
 	"github.com/nbd-wtf/go-nostr"
+
+	"github.com/fiatjaf/khatru"
 )
 
 func main() {
