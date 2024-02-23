@@ -119,3 +119,17 @@ Fear no more. Using the https://github.com/fiatjaf/eventstore module you get a b
 	relay.CountEvents = append(relay.CountEvents, db.CountEvents)
 	relay.DeleteEvent = append(relay.DeleteEvent, db.DeleteEvent)
 ```
+
+### Contributions and Improvements Welcome
+
+just make sure the tests pass :D
+
+```shell
+make lint
+make test
+make cover
+
+make docker.lint
+make docker.test
+make docker.cover
+```
