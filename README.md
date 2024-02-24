@@ -120,9 +120,9 @@ Fear no more. Using the https://github.com/fiatjaf/eventstore module you get a b
 	relay.DeleteEvent = append(relay.DeleteEvent, db.DeleteEvent)
 ```
 
-### Contributions and Improvements Welcome
+### Contributions
 
-just make sure the tests pass :D
+Make sure the tests pass. Soon linting will also pass.
 
 ```shell
 make lint
