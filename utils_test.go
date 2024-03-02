@@ -70,6 +70,7 @@ func TestGetOpenSubscriptions(t *testing.T) {
 	//t.Run("GetOpenSubscriptions() returns expected filters", func(t *testing.T) {
 	//	ctx := context.WithValue(context.Background(), wsKey, &khatru.WebSocket{})
 	//
+	//	// setlistener? Can't ever pass, needs refactor
 	//	subs := khatru.GetOpenSubscriptions(ctx)
 	//	assert.NotNil(t, subs)
 	//})
