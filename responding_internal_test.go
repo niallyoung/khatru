@@ -18,7 +18,7 @@ func TestRelay_handleRequest(t *testing.T) {
 		wg := &sync.WaitGroup{}
 		wg.Add(1)
 
-		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{Limit: -1})
+		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{})
 		assert.Nil(t, err)
 		assert.True(t, ovwFilterCalled)
 	})
@@ -30,5 +30,21 @@ func TestRelay_handleRequest(t *testing.T) {
 
 		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{Limit: -1})
 		assert.Nil(t, err)
+	})
+
+	t.Run("handleRequest() with a rejecting RejectFilter returns an error", func(t *testing.T) {
+		relay := NewRelay()
+		rejectFilterCalled := false
+		relay.RejectFilter = append(relay.RejectFilter,
+			func(ctx context.Context, filter nostr.Filter) (bool, string) {
+				rejectFilterCalled = true
+				return true, ""
+			})
+		wg := &sync.WaitGroup{}
+		wg.Add(1)
+
+		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{})
+		assert.ErrorContains(t, err, "blocked: ")
+		assert.True(t, rejectFilterCalled)
 	})
 }
