@@ -2,6 +2,7 @@ package khatru
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 
@@ -47,4 +48,61 @@ func TestRelay_handleRequest(t *testing.T) {
 		assert.ErrorContains(t, err, "blocked: ")
 		assert.True(t, rejectFilterCalled)
 	})
+
+	t.Run("handleRequest() executes QueryEvents with no error", func(t *testing.T) {
+		relay := NewRelay()
+		queryEventsCalled := false
+		relay.QueryEvents = append(relay.QueryEvents,
+			func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+				queryEventsCalled = true
+				return nil, nil
+			})
+		wg := &sync.WaitGroup{}
+		wg.Add(1)
+
+		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{})
+		assert.NoError(t, err)
+		assert.True(t, queryEventsCalled)
+	})
+
+	t.Run("handleRequest() executes QueryEvents with an error", func(t *testing.T) {
+		relay := NewRelay()
+		queryEventsCalled := false
+		relay.QueryEvents = append(relay.QueryEvents,
+			func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+				queryEventsCalled = true
+				return nil, errors.New("fake-query-error")
+			})
+		wg := &sync.WaitGroup{}
+		wg.Add(1)
+
+		err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{})
+		assert.NoError(t, err)
+		assert.True(t, queryEventsCalled)
+	})
+
+	//t.Run("handleRequest() executes OverwriteResponseEvent", func(t *testing.T) {
+	//	relay := NewRelay()
+	//	queryEventsCalled := false
+	//	overwriteResponseEventsCalled := false
+	//	relay.QueryEvents = append(relay.QueryEvents,
+	//		func(ctx context.Context, filter nostr.Filter) (chan *nostr.Event, error) {
+	//			queryEventsCalled = true
+	//			eventChan := make(chan *nostr.Event)
+	//			eventChan <- &nostr.Event{ID: "id"}
+	//			return eventChan, nil
+	//		})
+	//	relay.OverwriteResponseEvent = append(relay.OverwriteResponseEvent,
+	//		func(ctx context.Context, event *nostr.Event) {
+	//			overwriteResponseEventsCalled = true
+	//			return
+	//		})
+	//	wg := &sync.WaitGroup{}
+	//	wg.Add(1)
+	//
+	//	err := relay.handleRequest(context.Background(), "id", wg, &WebSocket{}, nostr.Filter{})
+	//	assert.NoError(t, err)
+	//	assert.True(t, queryEventsCalled)
+	//	assert.True(t, overwriteResponseEventsCalled)
+	//})
 }
