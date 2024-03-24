@@ -15,17 +15,13 @@ func TestNewRelay(t *testing.T) {
 	t.Run("constructor returns a Relay", func(t *testing.T) {
 		relay := khatru.NewRelay()
 		assert.NotNil(t, relay)
-	})
 
-	t.Run("foo", func(t *testing.T) {
-		relay := khatru.NewRelay()
-
-		var document *nip11.RelayInformationDocument
-		var logger *log.Logger
+		var expectedDocument *nip11.RelayInformationDocument
+		var expectedLogger *log.Logger
 
 		assert.Equal(t, "", relay.ServiceURL)
-		assert.IsType(t, document, relay.Info)
-		assert.IsType(t, logger, relay.Log)
+		assert.IsType(t, expectedDocument, relay.Info)
+		assert.IsType(t, expectedLogger, relay.Log)
 		assert.Equal(t, relay.WriteWait, 10*time.Second)
 		assert.Equal(t, relay.PongWait, 60*time.Second)
 		assert.Equal(t, relay.PingPeriod, 30*time.Second)
