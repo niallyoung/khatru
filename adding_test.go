@@ -18,7 +18,7 @@ func TestRelay_AddEvent(t *testing.T) {
 	t.Run(".RejectEvent", func(t *testing.T) {
 		t.Run("returns error when event is nil", func(t *testing.T) {
 			relay := khatru.NewRelay()
-			err := relay.AddEvent(context.Background(), nil)
+			_, err := relay.AddEvent(context.Background(), nil)
 
 			assert.Error(t, err)
 		})
@@ -31,7 +31,7 @@ func TestRelay_AddEvent(t *testing.T) {
 				},
 			)
 
-			err := relay.AddEvent(context.Background(), &nostr.Event{})
+			_, err := relay.AddEvent(context.Background(), &nostr.Event{})
 
 			assert.Error(t, err)
 			assert.ErrorContains(t, err, "blocked: reasons")
@@ -45,7 +45,7 @@ func TestRelay_AddEvent(t *testing.T) {
 				},
 			)
 
-			err := relay.AddEvent(context.Background(), &nostr.Event{})
+			_, err := relay.AddEvent(context.Background(), &nostr.Event{})
 
 			assert.Error(t, err)
 			assert.ErrorContains(t, err, "blocked: no reason")
@@ -62,7 +62,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						func(ctx context.Context, event *nostr.Event) { return },
 					)
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k})
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k})
 					assert.NoError(t, err)
 				})
 			}
@@ -80,7 +80,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						return nil, errors.New("fake QueryEvents error")
 					})
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k})
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k})
 					assert.NoError(t, err)
 				})
 			}
@@ -105,7 +105,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						func(ctx context.Context, event *nostr.Event) error { deleteEventCalled = true; return nil },
 					)
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k, CreatedAt: 1})
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{Kind: k, CreatedAt: 1})
 					assert.NoError(t, err)
 					assert.Equal(t, true, deleteEventCalled)
 				})
@@ -126,7 +126,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						return nil, errors.New("fake query error")
 					})
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{
 						Kind:   k,
 						PubKey: "fake-pubkey",
 						Tags: nostr.Tags{
@@ -164,7 +164,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						func(ctx context.Context, event *nostr.Event) error { deleteEventCalled = true; return nil },
 					)
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{
 						Kind:      k,
 						PubKey:    "fake-pubkey",
 						CreatedAt: 1,
@@ -203,7 +203,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						return
 					})
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{
 						Kind:      k,
 						PubKey:    "fake-pubkey",
 						CreatedAt: 0,
@@ -228,7 +228,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						return eventstore.ErrDupEvent
 					})
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{
 						Kind:      k,
 						PubKey:    "fake-pubkey",
 						CreatedAt: 0,
@@ -252,7 +252,7 @@ func TestRelay_AddEvent(t *testing.T) {
 						return errors.New("fake store error")
 					})
 
-					err := relay.AddEvent(context.Background(), &nostr.Event{
+					_, err := relay.AddEvent(context.Background(), &nostr.Event{
 						Kind:      k,
 						PubKey:    "fake-pubkey",
 						CreatedAt: 1,

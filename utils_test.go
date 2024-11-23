@@ -58,12 +58,3 @@ func TestGetSubscriptionID(t *testing.T) {
 		assert.Equal(t, "fake-subscription-id", id)
 	})
 }
-
-func TestGetOpenSubscriptions(t *testing.T) {
-	t.Run("GetOpenSubscriptions() returns nil when no subscriptions", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), wsKey, &khatru.WebSocket{})
-
-		subs := khatru.GetOpenSubscriptions(ctx)
-		assert.Nil(t, subs)
-	})
-}

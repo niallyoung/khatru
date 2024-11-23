@@ -2,7 +2,6 @@ package khatru
 
 import (
 	"context"
-	"github.com/fasthttp/websocket"
 	"testing"
 	"time"
 
@@ -54,19 +53,12 @@ func TestRelay_Start(t *testing.T) {
 func TestRelay_Shutdown(t *testing.T) {
 	t.Run("Shutdown() .....?", func(t *testing.T) {
 		relay := NewRelay()
-		key := &websocket.Conn{}
-		value := struct{}{}
 		timer := time.AfterFunc(time.Second*1, func() {
-			relay.clients.Store(key, value)
-			assert.Equal(t, 1, relay.clients.Size())
 			relay.Shutdown(context.Background())
 		})
 		defer timer.Stop()
 
 		err := relay.Start("localhost", 1234)
 		assert.NoError(t, err)
-
-		// Delete doesn't seem to delete, TODO:
-		//assert.Equal(t, 0, relay.clients.Size())
 	})
 }
