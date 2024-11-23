@@ -93,12 +93,12 @@ func TestNoSearchQueries(t *testing.T) {
 }
 
 func TestRemoveSearchQueries(t *testing.T) {
-	t.Run("empties Search and sets Limit to -1 when Search not empty", func(t *testing.T) {
+	t.Run("empties Search and sets Limit to 0 when Search not empty", func(t *testing.T) {
 		filter := &nostr.Filter{Search: "non-empty"}
 
 		policies.RemoveSearchQueries(context.Background(), filter)
 		assert.Equal(t, "", filter.Search)
-		assert.Equal(t, -1, filter.Limit)
+		assert.Equal(t, 0, filter.Limit)
 	})
 
 	t.Run("does nothing when Search is empty", func(t *testing.T) {
@@ -124,7 +124,7 @@ func TestRemoveAllButKinds(t *testing.T) {
 
 		fn := policies.RemoveAllButKinds(1, 3)
 		fn(context.Background(), filter)
-		assert.Equal(t, -1, filter.Limit)
+		assert.Equal(t, 2, filter.Limit)
 	})
 }
 
@@ -137,6 +137,6 @@ func TestRemoveAllButTags(t *testing.T) {
 		fn := policies.RemoveAllButTags("bah")
 		fn(context.Background(), filter)
 		assert.Equal(t, 0, len(filter.Tags))
-		assert.Equal(t, -1, filter.Limit)
+		assert.Equal(t, 0, filter.Limit)
 	})
 }
